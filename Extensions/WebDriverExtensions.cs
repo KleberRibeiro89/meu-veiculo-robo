@@ -55,5 +55,18 @@ namespace meu_veiculo_robo.Extensions
             var foto = camera.GetScreenshot();
             foto.SaveAsFile(path, ScreenshotImageFormat.Png);
         }
+
+        public static void ExecuteJavaScript(this IWebDriver driver, string script)
+        {
+            IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+            string title = (string)js.ExecuteScript(script);
+        }
+
+        public static void FullDispose(this IWebDriver webDriver)
+        {
+            webDriver?.Close();
+            webDriver?.Quit();
+            webDriver?.Dispose();
+        }
     }
 }
