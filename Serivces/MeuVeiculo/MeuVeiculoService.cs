@@ -2,6 +2,8 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
+using RestSharp;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -27,11 +29,25 @@ namespace meu_veiculo_robo.Serivces.MeuVeiculo
             _captchaService = captchaService;
         }
 
+        public async Task DevolverArquivo(string placa)
+        {
+            var client = new RestClient($"https://api.carflix.com.br/multas/salvar/{placa}?q=Fazenda");
+            client.Timeout = -1;
+            var request = new RestRequest(Method.POST);
+            request.AddHeader("Content-Type", "application/x-www-form-urlencoded");
+            request.AddFile("file", $"/{Path.Combine(Environment.CurrentDirectory, "Images", "Placa", string.Concat(placa,"png"))}");
+            IRestResponse response = client.Execute(request);
+            _logger.LogInformation(response.Content);
+
+            await Task.CompletedTask;
+        }
+
         public async Task FazerLeituraAsync(string renavam, string placa)
         {
             _logger.LogInformation("Começar a leitura");
             _logger.LogInformation($"Url: {_url}");
             _webDriver.Navigate().GoToUrl(_url);
+
 
             _logger.LogInformation($"preenchendo o campo Renavam: {renavam}");
             var renavamField = _webDriver.FindElement(By.XPath("//*[@id='txtRenavam']"));
@@ -81,14 +97,17 @@ namespace meu_veiculo_robo.Serivces.MeuVeiculo
 
             await Task.Delay(TimeSpan.FromSeconds(3));
 
+            
 
             _logger.LogInformation($"Navegando pra Url: { _url}forms/frmResumoMultas.aspx ");
             _webDriver.Navigate().GoToUrl($"{ _url}forms/frmResumoMultas.aspx");
 
 
             _logger.LogInformation("Tirando o print da tela");
-            nomeArquivo = $"{renavam}.png";
-            _webDriver.Screenshot(Path.Combine(Environment.CurrentDirectory, "Images","Renavam", nomeArquivo));
+            nomeArquivo = $"{placa}.png";
+            _webDriver.Screenshot(Path.Combine(Environment.CurrentDirectory, "Images","Placa", nomeArquivo));
+
+
 
             _logger.LogInformation("fechando o WebDriver");
             _webDriver.FullDispose();

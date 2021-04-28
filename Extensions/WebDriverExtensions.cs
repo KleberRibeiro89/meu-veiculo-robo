@@ -2,6 +2,7 @@
 using OpenQA.Selenium.Chrome;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -60,6 +61,21 @@ namespace meu_veiculo_robo.Extensions
         {
             IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
             string title = (string)js.ExecuteScript(script);
+        }
+
+        public static void ExportToPdf(this IWebDriver driver, string fileName)
+        {
+
+            // Output a PDF of the first page in A4 size at 90% scale
+            var printOptions = new Dictionary<string, object>
+                {
+                    { "paperWidth", 210 / 25.4 },
+                    { "paperHeight", 297 / 25.4 },
+                    { "scale", 0.9 }
+                };
+            var printOutput = ((ChromeDriver)driver).ExecuteChromeCommandWithResult("Page.printToPDF", printOptions) as Dictionary<string, object>;
+            var pdf = Convert.FromBase64String(printOutput["data"] as string);
+            File.WriteAllBytes(Path.Combine(Environment.CurrentDirectory, "Images", "Renavam",  $"{fileName}.pdf"), pdf);
         }
 
         public static void FullDispose(this IWebDriver webDriver)

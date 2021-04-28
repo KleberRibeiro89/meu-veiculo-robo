@@ -9,5 +9,7 @@ namespace meu_veiculo_robo.Serivces.MeuVeiculo
     public interface IMeuVeiculoSerivce 
     {
         Task FazerLeituraAsync(string renavam, string placa);
+
+        Task DevolverArquivo(string placa);
     }
 }
